@@ -137,10 +137,17 @@ module fadd(
   assign nmz1 = |(m1[22:0]); 
   assign nmz2 = |(m2[22:0]);              
   
-  //23だけ略
-  assign y={sy,ey,my};
+  assign y = 
+    (e1 == 255 && e2 != 255) ? {s1, 8'd255, nmz1, m1[21:0]} :
+    (e2 == 255 && e1 != 255) ? {s2, 8'd255, nmz2, m2[21:0]} :
+    (e1 == 255 && e2 == 255 && nmz2) ? {s2, 8'd255, 1'b1, m2[21:0]} :
+    (e1 == 255 && e2 == 255 && nmz1) ? {s1, 8'd255, 1'b1, m1[21:0]} :
+    (e1 == 255 && e2 == 255 && s1==s2) ? {s1, 8'd255, 23'b0} :
+    (e1 == 255 && e2 == 255) ? {1'b1, 8'd255, 1'b1, 22'b0} :   //+mugenn-mugenn=NaN. sentou 1'b0deha?
+    {sy,ey,my};    
+    
+  //overflow ha wakaran
   
-              
 endmodule   
    
    
