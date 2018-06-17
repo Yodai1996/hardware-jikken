@@ -33,7 +33,7 @@ module fadd(
   assign e2ai=~e2a;  //ayasii
   
   wire [8:0] te; //nannbittoshiftsuruka
-  assign te={1'b0, e1a}+{1'b0, e2ai};;        
+  assign te={1'b0, e1a}+{1'b0, e2ai};        
   
   wire ce;
   wire [7:0] tde;
