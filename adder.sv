@@ -44,8 +44,7 @@ module fadd(
   assign de = tde>31 ? 31 : tde[4:0];    //ayasii
   
   wire sel;
-  assign sel = (de==1) ? ce : ((m1a>m2a) ? 0 : 1);  //ayasii
-  
+  assign sel = (de==0) ? ((m1a > m2a) ? 0 : 1) : ce;  
   
   wire [24:0] ms;
   wire [24:0] mi;   
