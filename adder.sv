@@ -118,7 +118,7 @@ module fadd(
   assign myf = (eyf>0) ? myd<<se  : myd<<(eyd[4:0]-1) ;                
   assign eyr = (eyf>0) ? eyf[7:0] : 8'b0  ;                              
 
-  wire [26:0] myr;  
+  wire [24:0] myr;  
   assign myr = ((myf[1] == 1 && myf[0] == 0 && stck == 0 && myf[2] == 1)||(myf[1] == 1 && myf[0] == 0 && s1 == s2 && stck ==1)||(myf[1] == 1 && myf[0] == 1)) ? myf[26:2] + 23’b1 : myf[26:2];
   
   wire [7:0] eyri;      
