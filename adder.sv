@@ -38,7 +38,7 @@ module fadd(
   wire ce;
   wire [7:0] tde;
   assign ce=~te[8];  //ayasii
-  assign tde = (ce==0) ? (te+1)[7:0] : (~te)[7:0]; //ayasii
+  assign tde = (ce==0) ? (te+{9'b000000001})[7:0] : (~te)[7:0]; //ayasii
 
   wire [4:0] de;  
   assign de = tde>31 ? 31 : tde[4:0];    //ayasii
