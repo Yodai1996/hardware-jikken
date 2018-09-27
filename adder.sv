@@ -20,14 +20,14 @@ module fadd(
   wire [24:0] m1a;
   wire [24:0] m2a;  
 
-  assign m1a={2'b01, m1};  //ayasii
-  assign m2a={2'b01, m2};
+  assign m1a= (e1==0) ? {2'b00, m1} : {2'b01, m1};  //ayasii
+  assign m2a= (e2==0) ? {2'b00, m2} : {2'b01, m2}; 
   
   wire [7:0] e1a;
   wire [7:0] e2a;  
 
-  assign e1a=e1; //ayasii
-  assign e2a=e2;  
+  assign e1a= (e1==8'b0) ? 1 : e1; //ayasii
+  assign e2a= (e2==8'b0) ? 1 : e2;  
  
   wire [7:0] e2ai;    
   assign e2ai=~e2a;  //ayasii
@@ -38,7 +38,12 @@ module fadd(
   wire ce;
   wire [7:0] tde;
   assign ce=~te[8];  //ayasii
-  assign tde = (ce==0) ? (te+{9'b000000001})[7:0] : (~te)[7:0]; //ayasii
+  
+  wire [8:0] te2;
+  assign te2=te+9'b1;
+  wire [8:0] te3;
+  assign te3=~te;
+  assign tde = (ce==0) ? te2[7:0] : te3[7:0]; //ayasii
 
   wire [4:0] de;  
   assign de = tde>31 ? 31 : tde[4:0];    //ayasii
@@ -59,7 +64,7 @@ module fadd(
   assign ss = (sel==0) ? s1  : s2  ;
 
   wire [55:0] mie;
-  assign mie={mi, 31b'0};
+  assign mie={mi, 31'b0};
 
   wire [55:0] mia;  
   assign mia=mie>>de; //ayasii
@@ -78,6 +83,8 @@ module fadd(
   wire [26:0] myd;
   wire stck;    
   
+  wire flag1;
+  assign flag1 = (mye[26]==1 && esi==255) ? 1 : 0; //1 if overflow
   assign myd = (mye[26]==0) ? mye  :  ( (esi==255) ?  {2'b01,25'b0} : mye>>1 )  ;  
   assign eyd = (mye[26]==0) ? es   :  ( (esi==255) ?  255 : esi ) ;  
   assign stck = (mye[26]==0) ? tstck :  tstck || mye[0] ;      
@@ -115,20 +122,35 @@ module fadd(
 
   wire [7:0] eyr;    
   wire [26:0] myf;
-  assign myf = (eyf>0) ? myd<<se  : myd<<(eyd[4:0]-1) ;                
-  assign eyr = (eyf>0) ? eyf[7:0] : 8'b0  ;                              
+  assign myf = ({1'b0, eyd} > {4'b0, se}) ? (myd<<se)  : myd<<(eyd[4:0]-1) ;                
+  assign eyr = ({1'b0, eyd} > {4'b0, se}) ? eyf[7:0] : 8'b0  ;                              
+  
+  wire a;
+  assign a=(myf[1] == 1 && myf[0] == 0 && stck == 0 && myf[2] == 1) ? 1 : 0;
+  wire b;
+  assign b=(myf[1] == 1 && myf[0] == 0 && s1 == s2 && stck ==1) ? 1 : 0;
+  wire c;
+  assign c=(myf[1] == 1 && myf[0] == 1) ? 1 : 0 ;
+  wire d;
+  assign d=a||b||c ? 1 : 0;
+
+
 
   wire [24:0] myr;  
-  assign myr = ((myf[1] == 1 && myf[0] == 0 && stck == 0 && myf[2] == 1)||(myf[1] == 1 && myf[0] == 0 && s1 == s2 && stck ==1)||(myf[1] == 1 && myf[0] == 1)) ? myf[26:2] + 23’b1 : myf[26:2];
+  assign myr = (d==1) ? (myf[26:2] + 23'b1) : myf[26:2];
   
   wire [7:0] eyri;      
   assign eyri = eyr + 8'b1;
   
   wire [7:0] ey;        
-  wire [22:0] my;          
-  assign ey = (myr[24]==1) ? eyri  : ((&(myr[23:0])==0) ? 0 : eyr) ; //overflow arier.  honnmani 0 ka? 7'b0では?               
-  assign my = (myr[24]==1) ? 23'b0 : ((&(myr[23:0])==0) ? 23'b0 : myr[22:0])  ;      
+  wire [22:0] my;       
+  wire fack;
+  assign fack = |(myr[23:0]) ; //1 if at least there is 1. 0 if all of them is 0 
+  assign ey = (myr[24]==1) ? eyri  : ((fack==0) ? 0 : eyr) ; //overflow arier.  honnmani 0 ka? 7'b0では?               
+  assign my = (myr[24]==1) ? 23'b0 : ((fack==0) ? 23'b0 : myr[22:0])  ;      
   
+  wire flag2;
+  assign flag2 = ((myr[24]==1 && eyri==255) || flag1==1) ? 1 : 0; //1 if overflow
   wire sy;
   assign sy = (ey==0 && my==0) ? s1&&s2 : ss;
   
@@ -147,6 +169,7 @@ module fadd(
     {sy,ey,my};    
     
   //overflow ha wakaran
+  assign ovf=(e1<255 && e2<255 && flag2==1) ? 1 : 0;
   
 endmodule   
    
