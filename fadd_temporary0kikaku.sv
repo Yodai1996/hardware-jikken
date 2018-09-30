@@ -20,8 +20,11 @@ module fadd(
   wire [24:0] m1a;
   wire [24:0] m2a;  
 
-  assign m1a= (e1==0) ? {2'b00, m1} : {2'b01, m1};  //ayasii
-  assign m2a= (e2==0) ? {2'b00, m2} : {2'b01, m2}; 
+  //assign m1a= (e1==0) ? {2'b00, m1} : {2'b01, m1};  
+  //assign m2a= (e2==0) ? {2'b00, m2} : {2'b01, m2};  
+  //指数部0のものを全て0とみなす規格にする場合、この、e==0のときにmも0にしてしまえば、あとはIEEE規格の時と同様の足し算で問題ない。
+  assign m1a= (e1==0) ? 25'b0 : {2'b01, m1};  
+  assign m2a= (e2==0) ? 25'b0 : {2'b01, m2}; 
   
   wire [7:0] e1a;
   wire [7:0] e2a;  
