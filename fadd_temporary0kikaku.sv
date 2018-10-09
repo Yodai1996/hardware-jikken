@@ -7,6 +7,7 @@ module fadd(
   output wire [31:0] y,
   output wire ovf);
   
+//ovfは要らない。  
   wire s1;
   wire s2;
   wire [7:0] e1;
