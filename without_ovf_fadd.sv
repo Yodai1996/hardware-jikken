@@ -4,10 +4,11 @@
 module fadd(
   input wire [31:0] x1,
   input wire [31:0] x2,
-  output wire [31:0] y,
-  output wire ovf);
+  output wire [31:0] y);
   
-//ovfは要らない。  
+//ovfは要らないので消去した。
+//（今後）さらに無限大やNaNの処理、消したら早くなる。  
+  
   wire s1;
   wire s2;
   wire [7:0] e1;
@@ -87,8 +88,6 @@ module fadd(
   wire [26:0] myd;
   wire stck;    
   
-  wire flag1;
-  assign flag1 = (mye[26]==1 && esi==255) ? 1 : 0; //1 if overflow
   assign myd = (mye[26]==0) ? mye  :  ( (esi==255) ?  {2'b01,25'b0} : mye>>1 )  ;  
   assign eyd = (mye[26]==0) ? es   :  ( (esi==255) ?  255 : esi ) ;  
   assign stck = (mye[26]==0) ? tstck :  tstck || mye[0] ;      
@@ -153,8 +152,6 @@ module fadd(
   assign ey = (myr[24]==1) ? eyri  : ((fack==0) ? 0 : eyr) ; //overflow arier.  honnmani 0 ka? 7'b0では?               
   assign my = (myr[24]==1) ? 23'b0 : ((fack==0) ? 23'b0 : myr[22:0])  ;      
   
-  wire flag2;
-  assign flag2 = ((myr[24]==1 && eyri==255) || flag1==1) ? 1 : 0; //1 if overflow
   wire sy;
   assign sy = (ey==0 && my==0) ? s1&&s2 : ss;
   
@@ -171,9 +168,6 @@ module fadd(
     (e1 == 255 && e2 == 255 && s1==s2) ? {s1, 8'd255, 23'b0} :
     (e1 == 255 && e2 == 255) ? {1'b1, 8'd255, 1'b1, 22'b0} :   //+mugenn-mugenn=NaN. sentou 1'b0deha?
     {sy,ey,my};    
-    
-  //overflow ha wakaran
-  assign ovf=(e1<255 && e2<255 && flag2==1) ? 1 : 0;
   
 endmodule   
    
