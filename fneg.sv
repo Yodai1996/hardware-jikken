@@ -1,13 +1,13 @@
 `timescale 1ns / 1ps
 
-//when x==0, returns 1
-
-module fiszero(
+module fneg(
   input wire [31:0] x,
-  output wire y);
+  output wire [31:0] y);
   
-  assign y = (x[30:23]==8'b0) ? 1 : 0;
-
+  wire s;
+  assign s = ~x[31];
+  
+  assign y = {s, x[30:0]};
 endmodule   
    
    
